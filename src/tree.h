@@ -140,6 +140,7 @@ typedef enum tree_kind {
    T_SPEC,
    T_BINDING,
    T_LIBRARY,
+   T_DRIVER,
 
    T_LAST_TREE_KIND
 } tree_kind_t;

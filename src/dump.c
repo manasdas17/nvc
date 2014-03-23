@@ -398,6 +398,16 @@ static void dump_decl(tree_t t, int indent)
       printf("-- Enter scope %s\n", istr(tree_ident(t)));
       return;
 
+   case T_DRIVER:
+      printf("-- Driver for %s ", istr(tree_ident(tree_ref(t))));
+      if (tree_has_value(t)) {
+         dump_expr(tree_value(t));
+         printf("\n");
+      }
+      else
+         printf("(full signal)\n");
+      return;
+
    case T_COMPONENT:
       printf("component %s is\n", istr(tree_ident(t)));
       if (tree_generics(t) > 0) {

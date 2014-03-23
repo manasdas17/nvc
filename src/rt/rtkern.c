@@ -426,6 +426,11 @@ void _sched_event(void *_nids, int32_t n, int32_t flags)
    }
 }
 
+void _alloc_driver(const int32_t *nids, int32_t n)
+{
+   TRACE("_alloc_driver %s n=%d", fmt_net(nids[0]), n);
+}
+
 void _set_initial(int32_t nid, const uint8_t *values, const int32_t *size_list,
                   int32_t nparts, void *resolution, int32_t index,
                   const char *module)

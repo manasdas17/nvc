@@ -79,4 +79,7 @@ tree_t parse(void);
 // Number of errors found while parsing last unit
 int parse_errors(void);
 
+// Extract driver declarations from elaborated model
+void driver_extract(tree_t top);
+
 #endif  // _PHASE_H

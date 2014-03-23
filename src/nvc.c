@@ -202,6 +202,7 @@ static int elaborate(int argc, char **argv)
 
    opt(e);
    group_nets(e);
+   driver_extract(e);
 
    // Save the library now so the code generator can attach temporary
    // meta data to trees
