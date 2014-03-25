@@ -7,18 +7,52 @@ static tree_t driver_get_decl(tree_t t)
    switch (tree_kind(t)) {
    case T_REF:
       return tree_ref(t);
+   case T_ARRAY_REF:
+   case T_ARRAY_SLICE:
+      return driver_get_decl(tree_value(t));
    default:
       assert(false);
    }
 }
 
-static tree_t driver_longest_static_prefix(tree_t t)
+static bool driver_is_const(tree_t t)
+{
+   switch (tree_kind(t)) {
+   case T_LITERAL:
+      return true;
+   case T_REF:
+      {
+         tree_t decl = tree_ref(t);
+         return (tree_kind(decl) == T_ENUM_LIT);
+      }
+   default:
+      return false;
+   }
+}
+
+static tree_t longest_static_prefix(tree_t t)
 {
    // Longest static prefixes are in LRM 93 section 6.1
 
    switch (tree_kind(t)) {
    case T_REF:
       return NULL;
+   case T_ARRAY_REF:
+      {
+         tree_t value = tree_value(t);
+         if ((tree_kind(value) != T_REF)
+             && (longest_static_prefix(value) == NULL))
+            return NULL;
+
+         const int nparams = tree_params(t);
+         for (int i = 0; i < nparams; i++) {
+            tree_t p = tree_param(t, i);
+            if (!driver_is_const(tree_value(p)))
+               return NULL;
+         }
+
+         return t;
+      }
    default:
       assert(false);
    }
@@ -36,7 +70,7 @@ static void driver_signal_assign(tree_t t, tree_t proc)
    tree_set_loc(driver, tree_loc(t));
    tree_set_ref(driver, decl);
 
-   tree_t lsp = driver_longest_static_prefix(target);
+   tree_t lsp = longest_static_prefix(target);
    if (lsp != NULL)
       tree_set_value(driver, target);
 

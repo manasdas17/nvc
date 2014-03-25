@@ -399,13 +399,13 @@ static void dump_decl(tree_t t, int indent)
       return;
 
    case T_DRIVER:
-      printf("-- Driver for %s ", istr(tree_ident(tree_ref(t))));
+      printf("-- Driver for ");
       if (tree_has_value(t)) {
          dump_expr(tree_value(t));
          printf("\n");
       }
       else
-         printf("(full signal)\n");
+         printf("%s\n", istr(tree_ident(tree_ref(t))));
       return;
 
    case T_COMPONENT:
