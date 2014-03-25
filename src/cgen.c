@@ -59,6 +59,7 @@ static ident_t nest_parent_i;
 static ident_t returned_i;
 static ident_t static_i;
 static ident_t deferred_i;
+static ident_t llvm_agg_i;
 
 typedef struct case_arc   case_arc_t;
 typedef struct case_state case_state_t;
@@ -3325,6 +3326,10 @@ static LLVMValueRef cgen_aggregate(tree_t t, cgen_ctx_t *ctx)
 
    if (type_is_array(type)) {
       if (cgen_const_bounds(type) && cgen_is_const(t)) {
+         LLVMValueRef prev = tree_attr_ptr(t, llvm_agg_i);
+         if (prev != NULL)
+            return prev;
+
          int nvals;
          LLVMValueRef *vals = cgen_const_aggregate(t, type, 0, &nvals, ctx);
 
@@ -3335,6 +3340,8 @@ static LLVMValueRef cgen_aggregate(tree_t t, cgen_ctx_t *ctx)
          LLVMSetGlobalConstant(g, true);
          LLVMSetLinkage(g, LLVMInternalLinkage);
          LLVMSetInitializer(g, LLVMConstArray(ltype, vals, nvals));
+
+         tree_add_attr_ptr(t, llvm_agg_i, g);
 
          free(vals);
          return g;
@@ -6374,14 +6381,9 @@ static void cgen_cleanup_tmp_attrs(tree_t top)
    for (int i = 0; i < ndecls; i++) {
       tree_t d = tree_decl(top, i);
 
-      if (tree_attr_ptr(d, local_var_i))
-         tree_add_attr_ptr(d, local_var_i, NULL);
-
-      if (tree_attr_ptr(d, global_const_i))
-         tree_add_attr_ptr(d, global_const_i, NULL);
-
-      if (tree_attr_ptr(d, sig_nets_i))
-         tree_add_attr_ptr(d, sig_nets_i, NULL);
+      tree_remove_attr(d, local_var_i);
+      tree_remove_attr(d, global_const_i);
+      tree_remove_attr(d, sig_nets_i);
    }
 }
 
@@ -6404,6 +6406,7 @@ void cgen(tree_t top)
    returned_i     = ident_new("returned");
    static_i       = ident_new("static");
    deferred_i     = ident_new("deferred");
+   llvm_agg_i     = ident_new("llvm_agg");
 
    tree_kind_t kind = tree_kind(top);
    if ((kind != T_ELAB) && (kind != T_PACK_BODY) && (kind != T_PACKAGE))
