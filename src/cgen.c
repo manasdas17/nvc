@@ -284,8 +284,7 @@ static unsigned bit_width(type_t t)
 
 static unsigned byte_width(type_t t)
 {
-   const int bits = bit_width(t);
-   return (bits / 8) + ((bits % 8 != 0) ? 1 : 0);
+   return idiv_roundup(bit_width(t), 8);
 }
 
 static LLVMTypeRef llvm_uarray_type(LLVMTypeRef base, int dims)

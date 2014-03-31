@@ -1,5 +1,5 @@
 //
-//  Copyright (C) 2011-2013  Nick Gasson
+//  Copyright (C) 2011-2014  Nick Gasson
 //
 //  This program is free software: you can redistribute it and/or modify
 //  it under the terms of the GNU General Public License as published by
@@ -99,6 +99,11 @@ void checked_sprintf(char *buf, int len, const char *fmt, ...)
 
 int next_power_of_2(int n);
 int ilog2(int64_t n);
+
+static inline int idiv_roundup(int a, int b)
+{
+   return (a / b) + ((a % b > 0) ? 1 : 0);
+}
 
 void *mmap_guarded(size_t sz, const char *tag);
 
