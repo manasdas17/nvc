@@ -9,6 +9,7 @@ typedef struct driver_list driver_list_t;
 struct driver_list {
    driver_list_t *next;
    tree_t         decl;
+   bool           all;
    uint8_t        netmask[0];
 };
 
@@ -93,19 +94,39 @@ static void driver_target(tree_t t, driver_list_t **drivers)
       ;
 
    const int nnets = tree_nets(decl);
+   const int maskb = idiv_roundup(nnets, 8);
 
    if (d == NULL) {
-      const int maskb = idiv_roundup(nnets, 8);
-
       d = xmalloc(sizeof(driver_list_t) + maskb);
       d->next = *drivers;
       d->decl = decl;
+      d->all  = false;
       memset(d->netmask, '\0', maskb);
 
       *drivers = d;
    }
+   else if (d->all)
+      return;
 
    driver_expr(t, d, nnets, 0, nnets, nnets);
+
+   if (!d->all) {
+      bool all = true;
+      for (int i = 0; all && (i < maskb); i++) {
+         const uint8_t mask =
+            (i + 1 == maskb)
+            ? (0xff >> (maskb * 8 - nnets))
+            : 0xff;
+
+         if ((d->netmask[i] & mask) != mask)
+            all = false;
+      }
+
+      d->all = all;
+   }
+
+   if (d->all)
+      printf("drives whole signal");
 
 #if 0
    tree_t target = tree_target(t);
